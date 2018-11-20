@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Weather App</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html,
+    body { width: 100%; height: 100%; }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading {
+      position: absolute;
+      z-index: 9999;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+    }
+    .loading-spinner {
+      border: 8px solid rgb(255, 255, 255);
+      border-radius: 50%;
+      border-left-color: lightcoral;
+      width: 50px;
+      height: 50px;
+      animation: spin .2s linear infinite;
+    }
+
+    .container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .container .title {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      color: tomato;
+      font-size: 40px;
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .content-temp {
+      display: flex;
+      width: 300px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+    .content-temp-current {
+      font-size: 30px;
+      color: teal;
+      font-weight: 700;
+    }
+    .content-temp-minmax {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      font-size: 20px;
+      color: #ccc;
+      font-weight: 300;
+    }
+  </style>
+</head>
+<body>
+  <div class="loading" id="spinner">
+    <div class="loading-spinner"></div>
+  </div>
+  <div class="container">
+    <h1 class="title">Weather App :D</h1>
+    <div class="content-temp">
+      <span class="content-temp-current"><span id="tempCurrent">0</span> ºC</span>
+      <div class="content-temp-minmax">
+        <p>Min: <span id="tempMin">0</span> ºC</p>
+        <p>Max: <span id="tempMax">0</span> ºC</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (async window => {
+      const API_KEY = 'd4ba1a8fb0a181f0e59a6f3f60abf6a5'
+      const API_URI = `http://api.openweathermap.org/data/2.5/weather?appid=${API_KEY}&units=metric`
+      
+      const $ = el => document.getElementById(el)
+      const tempCurrentElement = $('tempCurrent')
+      const tempMinElement = $('tempMin')
+      const tempMaxElement = $('tempMax')
+      const loading = $('spinner')
+
+      const mountLatLntQuery = navigator => new Promise(resolve => {
+        navigator.geolocation.getCurrentPosition(position => {
+          const { coords } = position
+          resolve(`&lat=${coords.latitude}&lon=${coords.longitude}`)
+        })
+      })
+
+      try {
+        const query = await mountLatLntQuery(window.navigator)
+        const res = await fetch(API_URI + query)
+        const json = await res.json()
+        tempCurrentElement.innerText = json.main.temp.toFixed(0)
+        tempMaxElement.innerText = json.main.temp_max.toFixed(0)
+        tempMinElement.innerText = json.main.temp_min.toFixed(0)
+        loading.remove()
+      } catch (error) {
+        console.log('Something happen', error)
+      }
+    })(window)
+  </script>
+</body>
+</html>
